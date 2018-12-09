@@ -212,9 +212,7 @@ unsigned int sound_wav_len = 276686;
  80002b2:	f507 420a 	add.w	r2, r7, #35328	; 0x8a00
  80002b6:	f102 028c 	add.w	r2, r2, #140	; 0x8c
  80002ba:	6013      	str	r3, [r2, #0]
-//  DMA2_Channel3->CPAR = (uint32_t)&(DAC->DHR8R1);
-//  DMA2_Channel3->CMAR = (uint32_t)sound_wav; //memory address register
-//  DMA2_Channel3->CCR = DMA_CCR_MINC | DMA_CCR_CIRC  | DMA_CCR_DIR | DMA_CCR_EN; // enable circular, memory increment,  dir from memory to dac
+
 
   #include "../sound.c"
   uint32_t soundSize = sizeof(sound_wav);
