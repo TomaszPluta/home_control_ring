@@ -244,7 +244,7 @@ void SystemInit(void)
       RCC->CFGR = 0x00000000U;
       RCC->CFGR |=  RCC_CFGR_PLLMUL9;
       RCC->CFGR |=  RCC_CFGR_PLLSRC_HSE_PREDIV;
-
+      RCC->CFGR |=  RCC_CFGR_PPRE2_DIV2;
 
       RCC->CR |= RCC_CR_PLLON;
       while((RCC->CR & RCC_CR_PLLRDY) != RCC_CR_PLLRDY);
