@@ -35,7 +35,7 @@ dac::dac(uint8_t * waveSampleArray, uint32_t  waveSampleNb){
 	  DAC->CR = DAC_CR_DMAEN1 | DAC_CR_TEN1 |  DAC_CR_EN1;
 
 	  TIM6->ARR = 30;       // sampling freq (with prescaler)
-	  TIM6->PSC = 30;       //prescaler
+	  TIM6->PSC = 300;       //prescaler
 	  TIM6->CR2 |= TIM_CR2_MMS_1; // TRGO generated while timer overrun
 	  TIM6->CR1 |= TIM_CR1_ARPE | TIM_CR1_CEN; // TIM6 enable
 
