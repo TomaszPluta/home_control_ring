@@ -10,12 +10,17 @@
 
 #include "stdint.h"
 
+
+
+
+
 class SpiDriver{
 
 public:
 	SpiDriver();
-	uint8_t Transmit (uint8_t data);
-
+	static  uint8_t Transmit (uint8_t data);
+	static void SpiCsLow (void);
+	static void SpiCsHigh (void);
 };
 
 

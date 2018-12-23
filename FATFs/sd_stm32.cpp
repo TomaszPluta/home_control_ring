@@ -4,19 +4,20 @@
 /* Only rcvr_spi(), xmit_spi(), disk_timerproc() and some macros         */
 /* are platform dependent.                                               */
 /*-----------------------------------------------------------------------*/
-//#include "stm32f10x_lib.h"
 #include <stdbool.h>
-
+#include <stdio.h>
 #include "diskio.h"
 
-#include "stm32f10x.h"
-#include "stm32f10x_gpio.h"
+#include "stm32f3xx.h"
+#include "spi.h"
+
+
 
 #define TRUE 			true
 #define FALSE 			false
 
 #define SD_PORT_SS 		GPIOB
-#define SD_BIT_SS 		GPIO_Pin_9
+#define SD_BIT_SS 		12
 #define SD_SPI 			SPI2
 
 
@@ -56,64 +57,49 @@ static
 BYTE PowerFlag = 0;     /* indicates if "power" is on */
 
 static
-void SELECT (void) 		// CS w stan niski
+void SELECT (void)
 {
-	GPIO_ResetBits(SD_PORT_SS, SD_BIT_SS);
+	SpiDriver::SpiCsLow ();
 }
 
 static
-void DESELECT (void) 	// CS w stan wysoki
+void DESELECT (void)
 {
-	GPIO_SetBits(SD_PORT_SS, SD_BIT_SS);
+	SpiDriver::SpiCsHigh ();
 }
 
 
-
-uint8_t SpiTransmitSD( uint8_t cmd )
-{
-	/* Loop while DR register in not emplty */
-	while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET);
-
-	/* Send byte through the SPI1 peripheral */
-	SPI_I2S_SendData(SPI2, cmd);
-
-	/* Wait to receive a byte */
-	while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_RXNE) == RESET);
-
-	/* Return the byte read from the SPI bus */
-	uint16_t recData = SPI_I2S_ReceiveData(SPI2);
-
-	return recData;
-
-}
-
-
-
-
-static
-void xmit_spi (BYTE Data)  // Wyslanie bajtu do SD
-{
-	SpiTransmitSD(Data);
-}
-
-static
-BYTE rcvr_spi (void) 		// Odebranie bajtu z SD
-{
-	 u8 Data = 0;
-
-	 Data = SpiTransmitSD(0xFF);
-
-
-//  u8 Data = 0;
 //
-//  // Wyslanie 0xFF
-//  while (SPI_I2S_GetFlagStatus(SD_SPI, SPI_I2S_FLAG_TXE) == RESET);
-//  SPI_I2S_SendData(SD_SPI, 0xFF);
+//uint8_t SpiTransmitSD( uint8_t cmd )
+//{
+//	/* Loop while DR register in not emplty */
+//	while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET);
 //
-//  // Odebranie bajtu
-//  while (SPI_I2S_GetFlagStatus(SD_SPI, SPI_I2S_FLAG_RXNE) == RESET);
-//  Data = SPI_I2S_ReceiveData(SD_SPI);
+//	/* Send byte through the SPI1 peripheral */
+//	SPI_I2S_SendData(SPI2, cmd);
+//
+//	/* Wait to receive a byte */
+//	while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_RXNE) == RESET);
+//
+//	/* Return the byte read from the SPI bus */
+//	uint16_t recData = SPI_I2S_ReceiveData(SPI2);
+//
+//	return recData;
+//
+//}
+//
+//
 
+
+static void xmit_spi (BYTE Data)
+{
+	SpiDriver::Transmit(Data);
+}
+
+static BYTE rcvr_spi (void)
+{
+	 uint8_t Data = 0;
+	 Data = SpiDriver::Transmit(0xFF);
   return Data;
 }
 
@@ -151,12 +137,11 @@ BYTE wait_ready (void)
 static
 void power_on (void)
 {
-	u8 i;
+	uint8_t i;
  
   DESELECT();      // CS = 1
 
-  //Wyslanie 10 razy 0xFF co daje ponad 80 (>74) cykle zegara 
-  //wymagane przez specyfikacje SD
+
   for (i = 0; i < 10; i++)
     xmit_spi(0xFF);
 
@@ -220,7 +205,7 @@ bool xmit_datablock (
 )
 {
   BYTE resp, wc;
-	u32 i = 0;
+	uint32_t i = 0;
 
     if (wait_ready() != 0xFF) return FALSE;
 
@@ -471,7 +456,8 @@ DRESULT disk_ioctl (
 )
 {
     DRESULT res;
-    BYTE n, csd[16], *ptr = buff;
+    BYTE n, csd[16];
+    BYTE *ptr = (BYTE*) buff;
     WORD csize;
 
 
@@ -582,23 +568,4 @@ void disk_timerproc (void)
 
 }
 
-/*---------------------------------------------------------*/
-/* User Provided Timer Function for FatFs module           */
-/*---------------------------------------------------------*/
-/* This is a real time clock service to be called from     */
-/* FatFs module. Any valid time must be returned even if   */
-/* the system does not support a real time clock.          */
-
-DWORD get_fattime (void)
-{
-
-    return  ((2011UL-1980) << 25)    // Year = 2011
-            | (1UL << 21)            // Month = January
-            | (1UL << 16)            // Day = 1
-            | (12U << 11)            // Hour = 12
-            | (0U << 5)              // Min = 00
-            | (0U >> 1)              // Sec = 00
-            ;
-
-}
 

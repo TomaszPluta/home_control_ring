@@ -19,8 +19,8 @@ SpiDriver::SpiDriver(void){
 
 	RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
 
-	GPIOB->MODER |= GPIO_MODER_MODER12_0; //CS
-	GPIOB->MODER |= GPIO_MODER_MODER13_1; // etykiety spi nadac w definie
+	GPIOB->MODER |= GPIO_MODER_MODER12_0;
+	GPIOB->MODER |= GPIO_MODER_MODER13_1;
 	GPIOB->MODER |= GPIO_MODER_MODER14_1;
 	GPIOB->MODER |= GPIO_MODER_MODER15_1;
 
@@ -39,7 +39,7 @@ SpiDriver::SpiDriver(void){
 	GPIOB->AFR[1] |= (1<<28) | (1<<30);
 
 
-	SPI2->CR1 |= SPI_CR1_BR_0 | SPI_CR1_BR_1 ;
+	SPI2->CR1 |= SPI_CR1_BR_0 | SPI_CR1_BR_2 ;
 	SPI2->CR1 |= SPI_CR1_MSTR;
 	SPI2->CR1 |=  SPI_CR1_SSM;
 	SPI2->CR1 |=  SPI_CR1_SSI;
@@ -53,13 +53,27 @@ SpiDriver::SpiDriver(void){
 }
 
 
-uint8_t SpiDriver::Transmit(uint8_t byte){
+
+void SpiDriver::SpiCsLow (void){
 	GPIOB->ODR &= ~GPIO_ODR_12;
+}
+void SpiDriver::SpiCsHigh (void){
+	GPIOB->ODR |= GPIO_ODR_12;
+}
+
+
+
+
+uint8_t SpiDriver::Transmit(uint8_t byte){
 	while (!(SPI2->SR & SPI_SR_TXE));
 	*(__IO uint8_t *) &(SPI2->DR) = byte;
 	while (!(SPI2->SR & SPI_SR_RXNE));
-	GPIOB->ODR |= GPIO_ODR_12;
 	return *(uint8_t *)&(SPI2->DR);
 }
+
+
+
+
+
 
 

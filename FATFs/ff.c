@@ -305,6 +305,27 @@ static WCHAR LfnBuf[_MAX_LFN+1];
    Module Private Functions
 
 ---------------------------------------------------------------------------*/
+/*---------------------------------------------------------*/
+/* User Provided Timer Function for FatFs module           */
+/*---------------------------------------------------------*/
+/* This is a real time clock service to be called from     */
+/* FatFs module. Any valid time must be returned even if   */
+/* the system does not support a real time clock.          */
+
+
+DWORD get_fattime (void)
+{
+
+    return  ((2011UL-1980) << 25)    // Year = 2011
+            | (1UL << 21)            // Month = January
+            | (1UL << 16)            // Day = 1
+            | (12U << 11)            // Hour = 12
+            | (0U << 5)              // Min = 00
+            | (0U >> 1)              // Sec = 00
+            ;
+
+}
+
 
 
 /*-----------------------------------------------------------------------*/
@@ -2140,7 +2161,7 @@ FRESULT f_read (
 	FRESULT res;
 	DWORD clst, sect, remain;
 	UINT rcnt, cc;
-	BYTE csect, *rbuff = buff;
+	BYTE csect, *rbuff = (BYTE*)buff;
 
 
 	*br = 0;	/* Initialize byte counter */
@@ -2233,7 +2254,7 @@ FRESULT f_write (
 	FRESULT res;
 	DWORD clst, sect;
 	UINT wcnt, cc;
-	const BYTE *wbuff = buff;
+	const BYTE *wbuff = (BYTE*)buff;
 	BYTE csect;
 
 
