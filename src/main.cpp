@@ -5,17 +5,22 @@
 
 #include "dac.h"
 #include "spi.h"
-//  #include "../sound.c"
+#include "../doorbel.c"
 
+/*
+#include "wave.h"
 #include "diskio.h"
 #include "ff.h"
 #include "wave.h"
+*/
+
+
 int main(void)
 {
   SystemCoreClockUpdate();
 
 
-
+/*
   SpiDriver Spi;
 
 
@@ -36,8 +41,11 @@ int main(void)
   	uint8_t sound_wav[35460];
   	res = f_read(&fp,  (uint8_t*) sound_wav, 35460, &readBytes);
   	f_close(&fp);
+*/
 
-    dac dacObj((uint8_t*)sound_wav, 35460);
+
+
+    dac dacObj(doorbelWav, doorbelWavLen);
   while (1)
   {
 
